@@ -69,8 +69,24 @@ def scrape_article(url):
         return None
 
 def get_summary(title, content):
-    # Summaries disabled - return placeholder
-    return "Summary generation disabled"
+    try:
+        genai.configure(api_key=os.environ.get('GEMINI_API_KEY'))
+        model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        prompt = f"""Analyze this AI/ML research article and provide a concise summary that captures:
+1. The core innovation or finding
+2. Why it matters (practical implications or theoretical significance)
+3. Any notable limitations or caveats
+
+Title: {title}
+
+Content: {content[:3000]}
+
+Provide a clear, engaging summary in 3-4 sentences that would help a technical reader decide if they should read the full article."""
+        response = model.generate_content(prompt)
+        return response.text.strip()
+    except Exception as e:
+        print(f"    Summary generation failed: {str(e)[:50]}")
+        return "Summary unavailable"
 
 def fetch_new_entries():
     with open('feeds.txt', 'r') as f:
@@ -103,6 +119,7 @@ def fetch_new_entries():
                 # Fallback to RSS content
                 full_content = entry.get('summary', entry.get('description', entry.get('content', [{}])[0].get('value', '')))
             
+            full_content = full_content.strip() if full_content else ''
             summary = get_summary(entry.title, full_content)
             
             entries.append({

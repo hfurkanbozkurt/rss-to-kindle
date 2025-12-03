@@ -16,7 +16,26 @@ def save_sent_items(sent_items):
     with open('sent_items.json', 'w') as f:
         json.dump(sent_items, f)
 
-def scrape_article(url):
+def get_summary(title, content):
+    try:
+        import google.generativeai as genai
+        genai.configure(api_key=os.environ.get('GEMINI_API_KEY'))
+        model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        prompt = f"""Analyze this AI/ML research article and provide a concise summary that captures:
+1. The core innovation or finding
+2. Why it matters (practical implications or theoretical significance)
+3. Any notable limitations or caveats
+
+Title: {title}
+
+Content: {content[:3000]}
+
+Provide a clear, engaging summary in 3-4 sentences that would help a technical reader decide if they should read the full article."""
+        response = model.generate_content(prompt)
+        return response.text.strip()
+    except Exception as e:
+        print(f"    Summary generation failed: {str(e)[:50]}")
+        return "Summary unavailable"
     try:
         print(f"    Scraping full article...")
         headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'}
@@ -94,11 +113,16 @@ def fetch_new_entries():
                 # Fallback to RSS content
                 full_content = entry.get('summary', entry.get('description', entry.get('content', [{}])[0].get('value', '')))
             
+            full_content = full_content.strip() if full_content else ''
+            
+            # Generate summary
+            summary = get_summary(entry.title, full_content)
+            
             entries.append({
                 'id': entry_id,
                 'title': entry.title,
                 'link': entry.link,
-                'summary': 'Summary generation disabled',
+                'summary': summary,
                 'content': full_content,
                 'source': feed.feed.title
             })
