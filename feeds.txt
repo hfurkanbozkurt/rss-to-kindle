@@ -11,3 +11,13 @@ https://lightning.ai/pages/feed/
 https://wandb.ai/fully-connected/rss.xml
 https://distill.pub/rss.xml
 https://huyenchip.com/feed
+https://openai.com/news/rss.xml
+https://www.anthropic.com/news/rss.xml
+https://ai.meta.com/blog/rss.xml/
+https://aws.amazon.com/blogs/machine-learning/feed/
+https://ai.stanford.edu/blog/feed.xml
+https://github.blog/tag/engineering/feed/
+https://www.uber.com/blog/feed/
+https://instagram-engineering.com/feed
+https://cohere.com/blog/rss.xml
+https://stability.ai/blog/feed
