@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
 import feedparser
-import google.generativeai as genai
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
-from email import encoders
 from datetime import datetime, timedelta
-import os
 import json
+import os
 import requests
 from bs4 import BeautifulSoup
 
@@ -68,10 +63,6 @@ def scrape_article(url):
         print(f"    Failed to scrape: {str(e)[:50]}")
         return None
 
-def get_summary(title, content):
-    # Summaries disabled - return placeholder
-    return "Summary generation disabled"
-
 def fetch_new_entries():
     with open('feeds.txt', 'r') as f:
         feeds = [line.strip() for line in f if line.strip()]
@@ -103,13 +94,11 @@ def fetch_new_entries():
                 # Fallback to RSS content
                 full_content = entry.get('summary', entry.get('description', entry.get('content', [{}])[0].get('value', '')))
             
-            summary = get_summary(entry.title, full_content)
-            
             entries.append({
                 'id': entry_id,
                 'title': entry.title,
                 'link': entry.link,
-                'summary': summary,
+                'summary': 'Summary generation disabled',
                 'content': full_content,
                 'source': feed.feed.title
             })
@@ -156,33 +145,17 @@ a {{ color: #0066cc; }}
     html += "</body></html>"
     return html
 
-def send_to_kindle(html_content):
-    print(f"Preparing email to {os.environ['KINDLE_EMAIL']}")
-    msg = MIMEMultipart()
-    msg['From'] = os.environ['SMTP_USER']
-    msg['To'] = os.environ['KINDLE_EMAIL']
-    msg['Subject'] = f"AI Research Digest - {datetime.now().strftime('%Y-%m-%d')}"
-    
-    part = MIMEBase('application', 'octet-stream')
-    part.set_payload(html_content.encode('utf-8'))
-    encoders.encode_base64(part)
-    part.add_header('Content-Disposition', f'attachment; filename="digest.html"')
-    msg.attach(part)
-    
-    print(f"Connecting to {os.environ['SMTP_HOST']}:{os.environ['SMTP_PORT']}")
-    with smtplib.SMTP(os.environ['SMTP_HOST'], int(os.environ['SMTP_PORT'])) as server:
-        server.starttls()
-        print("Logging in...")
-        server.login(os.environ['SMTP_USER'], os.environ['SMTP_PASSWORD'])
-        print("Sending email...")
-        server.send_message(msg)
-    print("Email sent successfully!")
-
 if __name__ == '__main__':
     entries = fetch_new_entries()
     if entries:
         html = create_html(entries)
-        send_to_kindle(html)
-        print(f"Sent {len(entries)} articles to Kindle")
+        output_file = f"digest_{datetime.now().strftime('%Y%m%d')}.html"
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(html)
+        print(f"\nReport saved to: {output_file}")
+        
+        # Open in browser
+        import subprocess
+        subprocess.run(['open', output_file])
     else:
         print("No new articles")
