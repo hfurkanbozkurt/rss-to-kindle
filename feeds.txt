@@ -1,0 +1,10 @@
+https://www.anthropic.com/blog/rss
+https://openai.com/blog/rss
+https://www.research.google/blog/rss
+https://arxiv.org/rss/cs.AI
+https://arxiv.org/rss/cs.LG
+https://www.alignmentforum.org/rss
+https://www.lesswrong.com/feed
+https://huggingface.co/blog/rss
+https://www.microsoft.com/en-us/research/blog/feed/
+https://blog.deepmind.com/rss
