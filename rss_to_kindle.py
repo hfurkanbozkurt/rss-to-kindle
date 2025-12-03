@@ -21,7 +21,7 @@ def save_sent_items(sent_items):
 
 def get_summary(title, content):
     genai.configure(api_key=os.environ['GEMINI_API_KEY'])
-    model = genai.GenerativeModel('gemini-2.5-pro')
+    model = genai.GenerativeModel('gemini-2.0-flash-lite')
     prompt = f"""Analyze this AI/ML research article and provide a concise summary that captures:
 1. The core innovation or finding
 2. Why it matters (practical implications or theoretical significance)
