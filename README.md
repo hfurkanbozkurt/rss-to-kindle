@@ -1,6 +1,6 @@
 # RSS to Kindle
 
-Automatically fetches RSS feeds, generates AI summaries using Google Gemini 2.0 Flash Lite (free), and sends them to your Kindle.
+Automatically fetches RSS feeds, generates an AI digest summary using Google Gemini 2.5 Pro, and sends them to your Kindle.
 
 ## Setup
 
