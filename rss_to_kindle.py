@@ -85,24 +85,32 @@ def scrape_article(url):
         print(f"    Failed to scrape: {str(e)[:50]}")
         return None
 
-def get_summary(title, content):
+def get_digest_summary(entries):
     try:
         genai.configure(api_key=os.environ.get('GEMINI_API_KEY'))
-        model = genai.GenerativeModel('gemini-2.0-flash-exp')
-        prompt = f"""Analyze this AI/ML research article and provide a concise summary that captures:
-1. The core innovation or finding
-2. Why it matters (practical implications or theoretical significance)
-3. Any notable limitations or caveats
+        model = genai.GenerativeModel('gemini-2.5-pro')
 
-Title: {title}
+        articles_text = "\n\n".join([
+            f"Title: {e['title']}\nSource: {e['source']}\nContent: {e['content'][:2000]}"
+            for e in entries
+        ])
 
-Content: {content[:3000]}
+        prompt = f"""Analyze this collection of AI/ML research articles and provide a concise digest summary that:
+1. Identifies the main themes and trends across all articles
+2. Highlights the most significant findings or innovations
+3. Notes any connections or patterns between different articles
 
-Provide a clear, engaging summary in 3-4 sentences that would help a technical reader decide if they should read the full article."""
+Articles:
+<Articles>
+{articles_text}
+</Articles>
+
+Provide an engaging 2-3 paragraph summary of the entire digest."""
+
         response = model.generate_content(prompt)
         return response.text.strip()
     except Exception as e:
-        print(f"    Summary generation failed: {str(e)[:50]}")
+        print(f"Digest summary generation failed: {str(e)[:50]}")
         return "Summary unavailable"
 
 def fetch_new_entries():
@@ -138,13 +146,11 @@ def fetch_new_entries():
 
                 # Sanitize HTML for Kindle
                 full_content = sanitize_html(full_content.strip() if full_content else '')
-                summary = get_summary(entry.title, full_content)
 
                 entries.append({
                     'id': entry.get('id', entry.link),
                     'title': entry.title,
                     'link': entry.link,
-                    'summary': summary,
                     'content': full_content,
                     'source': feed.feed.title
                 })
@@ -155,7 +161,7 @@ def fetch_new_entries():
     print(f"Total new articles: {len(entries)}")
     return entries
 
-def create_html(entries):
+def create_html(entries, digest_summary):
     """Create Kindle-optimized HTML - very simple structure that Kindle conversion actually handles"""
 
     # Simple, flat structure that Kindle's email converter can handle
@@ -170,6 +176,9 @@ def create_html(entries):
 <h1>AI Research Digest</h1>
 <p><strong>{datetime.now().strftime('%B %d, %Y')}</strong></p>
 <p>{len(entries)} articles</p>
+
+<h2>Digest Summary</h2>
+<p>{digest_summary}</p>
 
 <h2>Table of Contents</h2>
 <ol>
@@ -186,7 +195,6 @@ def create_html(entries):
         html += f"""
 <h2 id="article{i}">{i}. {entry['title']}</h2>
 <p><strong>Source:</strong> {entry['source']}</p>
-<p><strong>Summary:</strong> {entry['summary']}</p>
 <p><strong>Link:</strong> <a href="{entry['link']}">{entry['link']}</a></p>
 <hr>
 {entry['content']}
@@ -197,7 +205,7 @@ def create_html(entries):
     html += "</body></html>"
     return html
 
-def create_epub(entries):
+def create_epub(entries, digest_summary):
     """Create a proper EPUB file for Kindle - this is what actually works well"""
     try:
         from ebooklib import epub
@@ -229,6 +237,8 @@ def create_epub(entries):
     <p><strong>{datetime.now().strftime('%B %d, %Y')}</strong></p>
     <p>Compiled by RSS to Kindle</p>
     <p>{len(entries)} articles in this digest</p>
+    <h2>Digest Summary</h2>
+    <p>{digest_summary}</p>
     </body></html>
     '''
     book.add_item(intro)
@@ -244,7 +254,6 @@ def create_epub(entries):
         <html><body>
         <h1>{entry['title']}</h1>
         <p><strong>Source:</strong> {entry['source']}</p>
-        <p><em>{entry['summary']}</em></p>
         <p><a href="{entry['link']}">Read online</a></p>
         <hr/>
         {entry['content']}
@@ -302,8 +311,12 @@ if __name__ == '__main__':
     entries = fetch_new_entries()
 
     if entries:
+        # Generate digest summary
+        print("Generating digest summary...")
+        digest_summary = get_digest_summary(entries)
+
         # Try to create EPUB (best for Kindle), fallback to HTML
-        epub_file = create_epub(entries)
+        epub_file = create_epub(entries, digest_summary)
 
         if epub_file:
             print(f"Created EPUB: {epub_file}")
@@ -315,7 +328,7 @@ if __name__ == '__main__':
         else:
             # Fallback to HTML
             print("Falling back to HTML (install ebooklib for better results)")
-            html = create_html(entries)
+            html = create_html(entries, digest_summary)
             if '--dry-run' in sys.argv:
                 with open('digest.html', 'w', encoding='utf-8') as f:
                     f.write(html)
