@@ -2,6 +2,8 @@
 
 Automatically fetches RSS feeds, generates an AI digest summary using Google Gemini 2.5 Pro, and sends them to your Kindle.
 
+[![RSS to Kindle](https://github.com/hfurkanbozkurt/rss-to-kindle/actions/workflows/rss-to-kindle.yml/badge.svg)](https://github.com/hfurkanbozkurt/rss-to-kindle/actions/workflows/rss-to-kindle.yml)
+
 ## Setup
 
 1. Fork this repository
