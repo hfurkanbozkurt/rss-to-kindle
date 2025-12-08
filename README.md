@@ -26,4 +26,4 @@ Edit `feeds.txt` to add/remove RSS feeds (one per line).
 
 ## Schedule
 
-Runs daily at 8 AM UTC. Modify `.github/workflows/rss-to-kindle.yml` to change schedule.
+Runs daily at 3 AM UTC. Modify `.github/workflows/rss-to-kindle.yml` to change schedule.
