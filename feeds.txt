@@ -20,3 +20,13 @@ https://lightning.ai/pages/feed/
 https://github.blog/tag/engineering/feed/
 https://www.uber.com/blog/feed/
 https://instagram-engineering.com/feed
+https://replicate.com/blog/rss
+https://www.marktechpost.com/feed
+https://research.google/blog/rss
+https://www.databricks.com/feed
+https://dagshub.com/blog/rss/
+https://machinelearningmastery.com/blog/feed/
+https://jalammar.github.io/feed.xml
+https://mlinproduction.com/feed
+https://ruder.io/rss/index.rss
+https://lilianweng.github.io/feed.xml
