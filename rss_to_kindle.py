@@ -88,24 +88,32 @@ def scrape_article(url):
 def get_digest_summary(entries):
     try:
         genai.configure(api_key=os.environ.get('GEMINI_API_KEY'))
-        model = genai.GenerativeModel('gemini-2.5-pro')
+        model = genai.GenerativeModel(os.environ.get('GEMINI_MODEL', 'gemini-2.5-flash'))
 
         articles_text = "\n\n".join([
-            f"Title: {e['title']}\nSource: {e['source']}\nContent: {e['content'][:2000]}"
+            f"Title: {e['title']}\nSource: {e['source']}\nContent: {e['content'][:10000]}"
             for e in entries
-        ])
+        ])[:200000]
 
-        prompt = f"""Analyze this collection of AI/ML research articles and provide a concise digest summary that:
-1. Identifies the main themes and trends across all articles
-2. Highlights the most significant findings or innovations
-3. Notes any connections or patterns between different articles
+        prompt = f"""You are an expert AI/ML research analyst creating a daily digest for busy professionals.
+
+Given {len(entries)} articles from today's AI/ML news, write an executive summary that:
+
+1. Opens with the single most important development and why it matters
+2. Groups related articles into 2-3 key themes (e.g., "LLM advances", "AI safety", "Industry moves")
+3. For each theme, explain the significance in plain language
+4. Ends with a "Don't miss" callout for the most actionable or surprising item
+
+Style guidelines:
+- Write for a technical audience who wants insights, not just headlines
+- Be specific: mention company names, model names, metrics when relevant
+- Keep it scannable: use short paragraphs
+- Total length: 250-350 words
 
 Articles:
-<Articles>
 {articles_text}
-</Articles>
 
-Provide an engaging 2-3 paragraph summary of the entire digest."""
+Write the digest summary now:"""
 
         response = model.generate_content(prompt)
         return response.text.strip()

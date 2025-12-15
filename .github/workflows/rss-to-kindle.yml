@@ -20,6 +20,7 @@ jobs:
       - name: Fetch and send
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: gemini-2.5-flash
           KINDLE_EMAIL: ${{ secrets.KINDLE_EMAIL }}
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
