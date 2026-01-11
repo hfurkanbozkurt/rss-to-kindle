@@ -130,7 +130,7 @@ def fetch_new_entries():
     # Get articles from yesterday 2am to today 2am UTC
     from datetime import timezone
     now = datetime.now(timezone.utc)
-    cutoff_start = now.replace(hour=2, minute=0, second=0, microsecond=0) - timedelta(days=1)
+    cutoff_start = now.replace(hour=2, minute=0, second=0, microsecond=0) - timedelta(days=7)
     cutoff_end = now.replace(hour=2, minute=0, second=0, microsecond=0)
 
     entries = []
